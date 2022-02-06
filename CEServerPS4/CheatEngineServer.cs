@@ -19,8 +19,7 @@ namespace CEServerPS4
         private CancellationTokenSource _tokenSource;
         private bool _listening;
         private CancellationToken _token;
-        private PS4API.PS4APIWrapper ps4 = PS4API.PS4APIWrapper.Instance();
-
+        
 
         public CheatEngineServer(ushort port = 52736) : this(port, new PacketManager())
         { 
@@ -51,12 +50,9 @@ namespace CEServerPS4
 
                     var command = this.packetManager.ReadNextCommand(reader);
                     var output = this.packetManager.ProcessAndGetBytes(command);
-                    /* if(command.CommandType != CommandType.CMD_READPROCESSMEMORY)
-                         Console.WriteLine(BitConverter.ToString(output).Replace("-", ""));*/
-                   // Console.WriteLine("{0} returned {1} bytes", command.CommandType, output.Length);
+                   
                     writer.Write(output);
-                    writer.Flush();
-                    //   Handle(stream, writer, cmd);
+                    writer.Flush();                   
 
                 }
                 catch(EndOfStreamException)
@@ -112,7 +108,6 @@ namespace CEServerPS4
 
         public void Dispose()
         {
-            PS4API.PS4APIWrapper.Disconnect();
             Stop();
         }
 
@@ -131,6 +126,14 @@ namespace CEServerPS4
             this.RegisterCommandHandler(new VirtualQueryExFullCommand());
             this.RegisterCommandHandler(new ReadProcessMemoryCommand());
             this.RegisterCommandHandler(new GetSymbolsFromFileCommand());
+            this.RegisterCommandHandler(new StartDebugCommand());
+            this.RegisterCommandHandler(new ResumeThreadCommand());
+            this.RegisterCommandHandler(new SuspendThreadCommand());
+            this.RegisterCommandHandler(new SetBreakPointCommand());
+            this.RegisterCommandHandler(new RemoveBreakPointCommand());
+            this.RegisterCommandHandler(new GetThreadContextCommand());
+            this.RegisterCommandHandler(new WaitForDebugEventCommand());
+            this.RegisterCommandHandler(new ContinueForDebugEventCommand());
         }
 
         public void RegisterCommandHandler(ICheatEngineCommand command)

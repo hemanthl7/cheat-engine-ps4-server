@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CEServerPS4</RootNamespace>
     <AssemblyName>CEServerPS4</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,7 +25,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -38,6 +38,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -56,9 +57,6 @@
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="libdebug">
-      <HintPath>..\libdebug.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -68,6 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="libdebug\acc.cs" />
     <Compile Include="CheatEnginePackets\C2S\CloseHandleCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\CreateToolHelp32SnapshotCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\CheatEngineCommand.cs" />
@@ -78,6 +77,15 @@
     <Compile Include="CheatEnginePackets\C2S\ICheatEngineCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\Module32FirstCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\Module32NextCommand.cs" />
+    <Compile Include="CheatEnginePackets\C2S\GetThreadContextCommand.cs" />
+    <Compile Include="CheatEnginePackets\C2S\RemoveBreakPointCommand.cs" />
+    <Compile Include="CheatEnginePackets\C2S\ContinueForDebugEventCommand.cs" />
+    <Compile Include="CheatEnginePackets\C2S\WaitForDebugEventCommand.cs" />
+    <Compile Include="CheatEnginePackets\C2S\SetBreakPointCommand.cs" />
+    <Compile Include="CheatEnginePackets\C2S\ResumeThreadCommand.cs" />
+    <Compile Include="CheatEnginePackets\C2S\StopDebugCommand.cs" />
+    <Compile Include="CheatEnginePackets\C2S\SuspendThreadCommand.cs" />
+    <Compile Include="CheatEnginePackets\C2S\StartDebugCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\OpenProcessCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\Process32FirstCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\Process32NextCommand.cs" />
@@ -96,9 +104,20 @@
     <Compile Include="CheatEnginePackets\S2C\Module32Response.cs" />
     <Compile Include="CheatEnginePackets\S2C\Process32Response.cs" />
     <Compile Include="CheatEnginePackets\MissingCommandHandlerException.cs" />
+    <Compile Include="CheatEnginePackets\S2C\ContinueForDebugEventResponse.cs" />
+    <Compile Include="CheatEnginePackets\S2C\WaitForDebugEventResponse.cs" />
+    <Compile Include="CheatEnginePackets\S2C\ThreadContextResponse.cs" />
     <Compile Include="CheatEnginePackets\S2C\ReadProcessMemoryResponse.cs" />
     <Compile Include="CheatEnginePackets\S2C\VirtualQueryExFullResponse.cs" />
     <Compile Include="CheatEnginePackets\S2C\VirtualQueryExResponse.cs" />
+    <Compile Include="libdebug\dbregs.cs" />
+    <Compile Include="libdebug\envxmm.cs" />
+    <Compile Include="libdebug\fpregs.cs" />
+    <Compile Include="libdebug\MemoryEntry.cs" />
+    <Compile Include="libdebug\Process.cs" />
+    <Compile Include="libdebug\ProcessInfo.cs" />
+    <Compile Include="libdebug\ProcessList.cs" />
+    <Compile Include="libdebug\ProcessMap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CheatEngineServer.cs" />
@@ -107,9 +126,17 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="PS4API\DebugAPI.cs" />
     <Compile Include="PS4API\PS4APIWrapper.cs" />
     <Compile Include="PS4API\MemoryAPI.cs" />
     <Compile Include="PS4API\ToolHelp.cs" />
+    <Compile Include="libdebug\PS4DBG.cs" />
+    <Compile Include="libdebug\regs.cs" />
+    <Compile Include="libdebug\savefpu_xstate.cs" />
+    <Compile Include="libdebug\ThreadInfo.cs" />
+    <Compile Include="libdebug\xmmacc.cs" />
+    <Compile Include="libdebug\xstate_hdr.cs" />
+    <Compile Include="libdebug\ymmacc.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

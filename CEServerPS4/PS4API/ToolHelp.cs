@@ -10,7 +10,6 @@ namespace CEServerPS4.PS4API
     public static class ToolHelp
     {
 
-        private static PS4APIWrapper ps4 = PS4APIWrapper.Instance();
 
         private static ProcessList processList = null;
 
@@ -197,7 +196,7 @@ namespace CEServerPS4.PS4API
                 if (process.pid.Equals(processId))
                 {
                     i++;
-                    ps4.ProcessID = processId;
+                    PS4APIWrapper.ProcessID = processId;
                     MemoryAPI.intit(processId);
                     return (IntPtr)i;
                 }

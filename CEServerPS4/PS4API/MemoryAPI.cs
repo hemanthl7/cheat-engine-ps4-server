@@ -9,7 +9,6 @@ namespace CEServerPS4.PS4API
 {
     public static class MemoryAPI
     {
-        public static PS4APIWrapper ps4 = PS4APIWrapper.Instance();
 
         private static  uint regionsize = 512;
 
@@ -60,8 +59,47 @@ namespace CEServerPS4.PS4API
             public TypeEnum Type;
         }
 
-      
-        public static bool ReadProcessMemory(
+        [StructLayout(LayoutKind.Sequential)]
+        public struct CONTEXT_REGS
+        {
+            public ulong r15;
+            public ulong r14;
+            public ulong r13;
+            public ulong r12;
+            public ulong rbp;
+            public ulong rbx;
+            public ulong r11;
+            public ulong r10;
+            public ulong r9;
+            public ulong r8;
+            public ulong rax;
+            public ulong rcx;
+            public ulong rdx;
+            public ulong rsi;
+            public ulong rdi;
+            public ulong orig_rax;
+            public ulong rip;
+            public ulong cs;
+            public ulong eflags;
+            public ulong rsp;
+            public ulong ss;
+            public ulong fs_base;
+            public ulong gs_base;
+            public ulong ds;
+            public ulong es;
+            public ulong fs;
+            public ulong gs;
+        };
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct CONTEXT
+        { 
+           public  CONTEXT_REGS regs;
+        }
+
+
+    public static bool ReadProcessMemory(
            IntPtr hProcess,
            ulong lpBaseAddress,
            out byte[] lpBuffer,
@@ -69,7 +107,7 @@ namespace CEServerPS4.PS4API
            out IntPtr lpNumberOfBytesRead)
         {
             byte[] readbuffer = new byte[nSize];
-            readbuffer = ps4.ReadMemory(lpBaseAddress, nSize);
+            readbuffer = PS4APIWrapper.ReadMemory(lpBaseAddress, nSize);
             lpBuffer = readbuffer;
             string value = BitConverter.ToString(readbuffer);
             lpNumberOfBytesRead = new IntPtr(readbuffer.Length);
@@ -79,7 +117,7 @@ namespace CEServerPS4.PS4API
         
         public static int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength)
         {
-            lpBuffer = new PS4API.MemoryAPI.MEMORY_BASIC_INFORMATION();
+            lpBuffer = new MEMORY_BASIC_INFORMATION();
             ulong address = (ulong)lpAddress;
             if (keys.Contains(address))
             {
@@ -230,16 +268,6 @@ namespace CEServerPS4.PS4API
         private static TypeEnum typeEnum(uint prot)
         {
             return TypeEnum.MEM_PRIVATE;
-        }
-
-
-        private static string names(string name, int part, IntPtr bs)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return part + '-' + bs.ToInt64().ToString();
-            }
-            return name;
         }
 
     }
