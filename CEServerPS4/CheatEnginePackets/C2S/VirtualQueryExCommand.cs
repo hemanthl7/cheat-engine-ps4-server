@@ -35,7 +35,7 @@ namespace CEServerPS4.CheatEnginePackets.C2S
         public override VirtualQueryExResponse Process()
         {
             PS4API.MemoryAPI.MEMORY_BASIC_INFORMATION mbi = new PS4API.MemoryAPI.MEMORY_BASIC_INFORMATION();
-            int ret = PS4API.MemoryAPI.VirtualQueryEx(Handle, (IntPtr)Address, out mbi, (uint)Marshal.SizeOf(mbi));
+            int ret = PS4API.MemoryAPI.VirtualQueryEx(Handle, Address, out mbi, (uint)Marshal.SizeOf(mbi));
 
             return new VirtualQueryExResponse(ret, mbi);
         }

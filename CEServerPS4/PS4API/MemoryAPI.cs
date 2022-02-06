@@ -10,13 +10,13 @@ namespace CEServerPS4.PS4API
     public static class MemoryAPI
     {
 
-        private static  uint regionsize = 512;
+        private static  ulong regionsize = 512;
 
-        private static uint pagesize = 512 * 8;
+        private static ulong pagesize = 512 * 8;
 
-        private static SortedDictionary<UInt64, MEMORY_BASIC_INFORMATION> memoryMap = new SortedDictionary<UInt64, MEMORY_BASIC_INFORMATION>();
+        private static SortedDictionary<ulong, MEMORY_BASIC_INFORMATION> memoryMap = new SortedDictionary<ulong, MEMORY_BASIC_INFORMATION>();
 
-        private static List<UInt64> keys;
+        private static List<ulong> keys;
 
         public enum AllocationProtectEnum : uint
         {
@@ -50,10 +50,10 @@ namespace CEServerPS4.PS4API
         [StructLayout(LayoutKind.Sequential)]
         public struct MEMORY_BASIC_INFORMATION
         {
-            public IntPtr BaseAddress;
-            public IntPtr AllocationBase;
+            public ulong BaseAddress;
+            public ulong AllocationBase;
             public AllocationProtectEnum AllocationProtect;
-            public IntPtr RegionSize;
+            public ulong RegionSize;
             public StateEnum State;
             public AllocationProtectEnum Protect;
             public TypeEnum Type;
@@ -114,22 +114,34 @@ namespace CEServerPS4.PS4API
             return true;
         }
 
-        
-        public static int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength)
+        public static bool WriteMemory(
+          IntPtr hProcess,
+          ulong lpBaseAddress,
+          byte[] lpBuffer,
+          Int32 nSize,
+          out IntPtr lpNumberOfBytesRead)
+        {
+            PS4APIWrapper.WriteMemory(lpBaseAddress, lpBuffer);
+            lpNumberOfBytesRead = new IntPtr(nSize);
+            return true;
+        }
+
+
+        public static int VirtualQueryEx(IntPtr hProcess, ulong lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer,uint dwLength)
         {
             lpBuffer = new MEMORY_BASIC_INFORMATION();
             ulong address = (ulong)lpAddress;
             if (keys.Contains(address))
             {
-                memoryMap.TryGetValue(address, out lpBuffer);
-                if (lpBuffer.BaseAddress == null)
+                
+                if (!memoryMap.TryGetValue(address, out lpBuffer))
                 {
                     return 0;
                 }
                 return 1;
             }
 
-            if (lpAddress.ToInt64() == 0)
+            if (lpAddress == 0)
             {
                 lpBuffer = memoryMap.First().Value;
                 return 1;
@@ -141,8 +153,8 @@ namespace CEServerPS4.PS4API
                 {
                     if (address < adrs)
                     {
-                        memoryMap.TryGetValue(adrs, out lpBuffer);
-                        if (lpBuffer.BaseAddress == null)
+                        
+                        if (!memoryMap.TryGetValue(adrs, out lpBuffer))
                         {
                             return 0;
                         }
@@ -156,36 +168,6 @@ namespace CEServerPS4.PS4API
 
         }
 
-
-        public static int VirtualQueryExFull(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength)
-        {
-            if (lpAddress.ToInt64() == 0)
-            {
-                lpBuffer = memoryMap.First().Value;
-                return 1;
-            }
-            else
-            {
-                if (lpAddress.ToInt32() < keys.Count)
-                {
-                    ulong address = keys[lpAddress.ToInt32()];
-                    memoryMap.TryGetValue(address, out lpBuffer);
-                    if (lpBuffer.BaseAddress == null)
-                    {
-                        return 0;
-                    }
-                }
-                else
-                {
-                    lpBuffer = new PS4API.MemoryAPI.MEMORY_BASIC_INFORMATION();
-                    return 0;
-                }
-                
-                
-                return 1;
-            }
-
-        }
 
 
         public static void intit( int pid)
@@ -201,23 +183,22 @@ namespace CEServerPS4.PS4API
 
                     ulong length = entry.end - entry.start;
                     ulong start = entry.start;
-                    string name = entry.name;
-                    int idx = 0;
-                    uint buffer_length = regionsize * pagesize;
+                    
+                    ulong buffer_length = regionsize * pagesize;
 
                     //Executable section
                     if ((entry.prot & 0x5) == 0x5)
                     {
-                        buffer_length = Convert.ToUInt32(length);
+                        buffer_length =length;
                     }
-                    int part = 0;
+                    
                     while (length != 0)
                     {
-                        uint cur_length = buffer_length;
+                        ulong cur_length = buffer_length;
 
                         if (cur_length > length)
                         {
-                            cur_length = Convert.ToUInt32(length);
+                            cur_length = length;
                             length = 0;
                         }
                         else
@@ -225,21 +206,20 @@ namespace CEServerPS4.PS4API
                             length -= cur_length;
                         }
                         MEMORY_BASIC_INFORMATION m32Entry = new MEMORY_BASIC_INFORMATION();
-                        m32Entry.BaseAddress = (IntPtr)start;
-                        m32Entry.AllocationBase = (IntPtr)start;
+                        m32Entry.BaseAddress = start;
+                        m32Entry.AllocationBase = start;
                         m32Entry.AllocationProtect = allocationProtect(entry.prot);
-                        m32Entry.RegionSize = (IntPtr)cur_length;
+                        m32Entry.RegionSize =   cur_length;
                         m32Entry.Type = typeEnum(entry.prot);
-                        part++;
-
+                       
                         memoryMap[start]= m32Entry;
 
                         start += cur_length;
-                        ++idx;
+                       
                     }
                 }
             }
-            keys = new List<UInt64>(memoryMap.Keys.AsEnumerable());
+            keys = new List<ulong>(memoryMap.Keys.AsEnumerable());
 
         }
 

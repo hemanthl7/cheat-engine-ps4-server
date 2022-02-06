@@ -39,6 +39,7 @@ namespace CEServerPS4.CheatEnginePackets.S2C
                 PS4API.DebugAPI.CreateDebugEvent bf = (PS4API.DebugAPI.CreateDebugEvent)et;
                 br.Write(bf.debugevent);
                 br.Write(bf.threadid);
+                br.Write((ulong)0);
             }
             else if(et is PS4API.DebugAPI.ProcessEvent)
             {
@@ -48,7 +49,8 @@ namespace CEServerPS4.CheatEnginePackets.S2C
                 br.Write(pe.maxBreakpointCount);
                 br.Write(pe.maxWatchpointCount);
                 br.Write(pe.maxSharedBreakpoints);
-                br.Write(pe.address);
+                br.Write((sbyte)0);
+                br.Write((int)0);
             }
             else
             {

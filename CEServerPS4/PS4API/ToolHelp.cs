@@ -75,9 +75,9 @@ namespace CEServerPS4.PS4API
             internal uint th32ProcessID;
             internal uint GlblcntUsage;
             internal uint ProccntUsage;
-            internal IntPtr modBaseAddr;
+            internal ulong modBaseAddr;
             internal uint modBaseSize;
-            internal IntPtr hModule;
+            internal ulong hModule;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
             internal string szModule;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
@@ -251,10 +251,10 @@ namespace CEServerPS4.PS4API
                             length -= cur_length;
                         }
                         MODULEENTRY32 m32Entry = new PS4API.ToolHelp.MODULEENTRY32();
-                        m32Entry.modBaseAddr = (IntPtr)start;
+                        m32Entry.modBaseAddr = start;
                         m32Entry.GlblcntUsage = Convert.ToUInt32(part);
                         m32Entry.modBaseSize = cur_length;
-                        m32Entry.szModule = names(entry.name,part, (IntPtr)start);
+                        m32Entry.szModule = names(entry.name,part, start);
                         m32Entry.th32ProcessID = Convert.ToUInt32(pm.pid);
                         part++;
 
@@ -268,11 +268,11 @@ namespace CEServerPS4.PS4API
 
         }
 
-        private static string names(string name, int part,IntPtr bs)
+        private static string names(string name, int part,ulong bs)
         {
             if (string.IsNullOrEmpty(name))
             {
-                return string.Join("-",part ,Convert.ToString(bs.ToInt64(), 16)); 
+                return string.Join("-",part ,bs.ToString("X")); 
             }
             return name;
         }

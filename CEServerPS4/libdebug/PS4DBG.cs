@@ -462,7 +462,7 @@ namespace libdebug
 			socket2.Blocking = false;
 			while (this.IsDebugging)
 			{
-				if (12 == 1184)
+				if (socket2.Available == 0x4A0)
 				{
 					byte[] buffer = new byte[1184];
 					if (socket2.Receive(buffer, 1184, SocketFlags.None) == 1184)

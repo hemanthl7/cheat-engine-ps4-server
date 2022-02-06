@@ -37,8 +37,7 @@ namespace CEServerPS4.CheatEnginePackets.C2S
         {
             
             IntPtr ptr = PS4API.DebugAPI.GetThreadContext(Handle, tid, out PS4API.DebugAPI.CONTEXT Context, type);
-            bool isSucess = (int)ptr == 1 ? true : false;
-            return new ThreadContextResponse(Context.regs, isSucess);
+            return new ThreadContextResponse(Context.regs, ptr);
         }
     }
 }

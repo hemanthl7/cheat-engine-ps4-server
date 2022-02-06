@@ -3,29 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace CEServerPS4.CheatEnginePackets.S2C
 {
-    public class ContinueForDebugEventResponse : ICheatEngineResponse
+    public class WriteProcessMemoryResponse : ICheatEngineResponse
     {
-        private IntPtr handle;
-
-
-        public ContinueForDebugEventResponse(IntPtr handle)
+        public Int32 Data;
+        public WriteProcessMemoryResponse(Int32 data)
         {
-            this.handle = handle;
+            this.Data = data;
         }
 
         public byte[] Serialize()
         {
             MemoryStream ms = new MemoryStream();
             BinaryWriter br = new BinaryWriter(ms);
-           
-            br.Write((int)handle);          
+            br.Write(Data);
             br.Close();
             return ms.ToArray();
         }
-   
     }
 }

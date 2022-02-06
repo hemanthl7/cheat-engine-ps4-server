@@ -38,9 +38,16 @@ namespace CEServerPS4.CheatEnginePackets.C2S
             while(true)
             {
                 PS4API.MemoryAPI.MEMORY_BASIC_INFORMATION mbi = new PS4API.MemoryAPI.MEMORY_BASIC_INFORMATION();
-                ret = PS4API.MemoryAPI.VirtualQueryEx(Handle, (IntPtr)currentAddress, out mbi, (uint)Marshal.SizeOf(mbi));
-                if (ret == 0)
-                    break;
+                try
+                {
+                    ret = PS4API.MemoryAPI.VirtualQueryEx(Handle, currentAddress, out mbi, (uint)Marshal.SizeOf(mbi));
+                     if (ret == 0)
+                        break;
+                }catch(Exception e)
+                {
+                    Console.WriteLine(currentAddress);
+                }
+               
                 currentAddress = (ulong)mbi.BaseAddress+(ulong)mbi.RegionSize;
                 regions.Add(mbi);
             }

@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Threading;
 using libdebug;
+using System.Runtime.InteropServices;
 
 namespace CEServerPS4.PS4API
 {
@@ -15,13 +14,32 @@ namespace CEServerPS4.PS4API
         public static PS4DBG[] ps4 = new PS4DBG[num_threads];
         private static Mutex[] mutex = new Mutex[num_threads];
 
-        private static int mutexId = 0;
+
+        [StructLayout(LayoutKind.Sequential)]
+        [Serializable]
+        public struct ProcessEvent
+        {
+
+            public int debugevent;
+
+            public ulong threadid;
+
+            public sbyte maxBreakpointCount;
+
+            public sbyte maxWatchpointCount;
+
+            public uint maxSharedBreakpoints;
+
+            public ulong address;
+        }
+
+        private static  int mutexId = 0;
 
         private static PS4APIWrapper ps4Wrapper;
 
         public static PS4APIWrapper Instance()
         {
-            if (ps4Wrapper == null)
+            if(ps4Wrapper == null)
             {
                 ps4Wrapper = new PS4APIWrapper();
             }
@@ -51,7 +69,7 @@ namespace CEServerPS4.PS4API
 
         public static int ProcessID
         {
-            get; set;
+          get; set; 
         }
 
         public static bool Connect(string ip)
@@ -62,11 +80,11 @@ namespace CEServerPS4.PS4API
                 {
                     mutex[i].WaitOne();
                     ps4[i] = new PS4DBG(ip);
-                    ps4[i].Connect();
+                    ps4[i].Connect();                   
                 }
                 ps4Debugger = new PS4DBG(ip);
                 ps4Debugger.Connect();
-                return true;
+                return true; 
             }
             catch
             {
@@ -91,7 +109,7 @@ namespace CEServerPS4.PS4API
                     if (ps4[i] != null)
                     {
                         ps4[i].Disconnect();
-                    }
+                    }                 
                 }
 
                 return true;
@@ -114,7 +132,7 @@ namespace CEServerPS4.PS4API
             mutex[currentThreadId].WaitOne();
             try
             {
-                return ps4[currentThreadId].ReadMemory(ProcessID, address, length);
+                return ps4[currentThreadId].ReadMemory(ProcessID, address, length);                
             }
             catch
             {
@@ -169,7 +187,7 @@ namespace CEServerPS4.PS4API
         {
             int currentThreadId = MutrexID;
             mutex[currentThreadId].WaitOne();
-
+           
             try
             {
                 ProcessInfo processInfo = ps4[currentThreadId].GetProcessInfo(processID);
@@ -208,16 +226,16 @@ namespace CEServerPS4.PS4API
 
         public static uint[] GetThreadsList()
         {
-
+            
             try
             {
-                return ps4Debugger.GetThreadList();
+                return ps4Debugger.GetThreadList(); 
             }
             catch
             {
                 Console.WriteLine("Error while GetThreadsList ");
             }
-
+            
             return null;
         }
 
@@ -225,8 +243,12 @@ namespace CEServerPS4.PS4API
         {
             try
             {
-
-                ps4Debugger.AttachDebugger(ProcessID, new PS4DBG.DebuggerInterruptCallback(DebuggerInterruptCallback));
+                if (!ps4Debugger.IsDebugging)
+                {
+                    ps4Debugger.AttachDebugger(ProcessID, new PS4DBG.DebuggerInterruptCallback(DebugAPI.DebuggerInterruptCallback));
+                    ps4Debugger.ProcessResume();
+                }
+               
                 return 1;
             }
             catch (Exception e)
@@ -260,15 +282,29 @@ namespace CEServerPS4.PS4API
                 ps4Debugger.DetachDebugger();
                 return 1;
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 Console.WriteLine("unable to detach");
                 Console.WriteLine(e.Message);
                 return 0;
             }
-
+            
         }
 
+
+        public static void ProcessResume()
+        {
+            try
+            {
+                ps4Debugger.ProcessResume();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("unable to resume");
+                Console.WriteLine(e.Message);
+            }
+
+        }
 
         public static void resumeDebuggerThread(uint tid)
         {
@@ -285,7 +321,7 @@ namespace CEServerPS4.PS4API
         }
 
 
-        public static void SuspendDebuggerThread(uint tid)
+        public static void StopDebuggerThread(uint tid)
         {
             try
             {
@@ -293,13 +329,13 @@ namespace CEServerPS4.PS4API
             }
             catch (Exception e)
             {
-                Console.WriteLine("unable to stop");
+                Console.WriteLine("unable to detach");
                 Console.WriteLine(e.Message);
             }
 
         }
 
-
+      
         public static void ClearBreakpoints()
         {
             for (int index = 0; (long)index < (long)PS4DBG.MAX_BREAKPOINTS; ++index)
@@ -313,10 +349,10 @@ namespace CEServerPS4.PS4API
                     PS4DBG.WATCHPT_BREAKTYPE.DBREG_DR7_EXEC, 0UL);
         }
 
-        public static void SetWatchpoint(int watchpoint, ulong address, int watchtLength, int type)
+        public static void SetWatchpoint(int watchpoint,ulong address,int watchtLength,int type)
         {
             PS4DBG.WATCHPT_LENGTH watchptLength = PS4DBG.WATCHPT_LENGTH.DBREG_DR7_LEN_1;
-
+            
             if (!(watchtLength == 1))
             {
                 if (!(watchtLength == 2))
@@ -353,21 +389,20 @@ namespace CEServerPS4.PS4API
             {
                 ps4Debugger.ChangeWatchpoint(watchpoint, true, watchptLength, watchptBreaktype,
                 address);
-            }
-            catch (Exception e)
+            }catch(Exception e)
             {
                 Console.WriteLine("breakpoint error");
             }
-
+            
         }
 
-        public static void ClearWatchpoint(int watchpoint)
+        public static  void ClearWatchpoint(int watchpoint)
         {
             ps4Debugger.ChangeWatchpoint(watchpoint, false,
                 PS4DBG.WATCHPT_LENGTH.DBREG_DR7_LEN_1, PS4DBG.WATCHPT_BREAKTYPE.DBREG_DR7_EXEC, 0UL);
         }
 
-        public static void SetBreakpoint(int watchpoint, ulong address)
+        public static  void SetBreakpoint(int watchpoint,ulong address)
         {
             ps4Debugger.ChangeBreakpoint(watchpoint, true, address);
         }

@@ -25,8 +25,8 @@ namespace CEServerPS4.CheatEnginePackets.S2C
             //But in Cheat engise server 1 is success and 0 is failed
             foreach (var region in Regions)
             {//Yes this is reversed from VirtualQueryEx....
-                br.Write((long)region.BaseAddress);
-                br.Write((long)region.RegionSize);
+                br.Write(region.BaseAddress);
+                br.Write(region.RegionSize);
                 br.Write((int)region.AllocationProtect); // Or Protect
                 br.Write((int)region.Type);
             }

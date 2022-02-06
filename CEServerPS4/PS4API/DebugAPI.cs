@@ -1,22 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
+﻿using CEServerPS4.EventHandler;
+using CEServerPS4.EventHandler.Event;
+using CEServerPS4.EventHandler.Request;
 using libdebug;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Threading;
+
 
 namespace CEServerPS4.PS4API
 {
     public static class DebugAPI
     {
-        
+
         private static uint[] threadIds;
 
         private static Object currentDebugEvent;
 
         private static BlockingCollection<Object> debugEvents = new BlockingCollection<Object>();
+
+        private static uint debugThread;
+
+        private static HashSet<uint> threads = new HashSet<uint>();
+
+        private static HashSet<ulong> adrresses = new HashSet<ulong>();
 
 
         [StructLayout(LayoutKind.Sequential)]
@@ -64,12 +72,10 @@ namespace CEServerPS4.PS4API
         [Serializable]
         public struct CreateDebugEvent
         {
-            
+
             public int debugevent;
 
             public ulong threadid;
-
-            public ulong address;
 
         }
 
@@ -90,18 +96,16 @@ namespace CEServerPS4.PS4API
         [Serializable]
         public struct ProcessEvent
         {
-           
-            public int debugevent;
-            
-            public ulong threadid;                
-           
-            public sbyte maxBreakpointCount;
-            
-            public sbyte maxWatchpointCount;
-           
-            public uint maxSharedBreakpoints;
 
-            public ulong address;
+            public int debugevent;
+
+            public ulong threadid;
+
+            public sbyte maxBreakpointCount;
+
+            public sbyte maxWatchpointCount;
+
+            public sbyte maxSharedBreakpoints;
         }
 
 
@@ -116,16 +120,15 @@ namespace CEServerPS4.PS4API
 
             //debugThreadId = lwpid;
             Console.WriteLine("status=:" + status);
-            DebugEvent evet = new DebugEvent(); 
+            DebugEvent evet = new DebugEvent();
+            evet.debugevent = 5;
             evet.threadid = lwpid;
             evet.address = regs.r_rip;
-            Thread debugThread = new Thread(addDebugEvent) { IsBackground = true };
-            debugThread.Start(evet);
-            
+            debugThread = lwpid;
 
-            //ps4.Notify(222, "interrupt hit\n(thread: " + tdname + " id: " + (object)lwpid + ")");
 
-            // this.data = this.ps4.ReadMemory(this.attachpid, this.address, this.length);
+            Thread nThread = new Thread(addDebugEvent) { IsBackground = true };
+            nThread.Start(evet);
 
         }
 
@@ -168,7 +171,7 @@ namespace CEServerPS4.PS4API
 
         public static IntPtr StartDebug(IntPtr hProcess)
         {
-            
+
             IntPtr value = (IntPtr)PS4APIWrapper.attachDebugger();
             threadIds = PS4APIWrapper.GetThreadsList();
             ProcessEvent processEvent = new ProcessEvent();
@@ -176,21 +179,26 @@ namespace CEServerPS4.PS4API
             processEvent.threadid = threadIds[0];
             processEvent.maxBreakpointCount = Convert.ToSByte(PS4DBG.MAX_BREAKPOINTS);
             processEvent.maxWatchpointCount = Convert.ToSByte(PS4DBG.MAX_WATCHPOINTS);
-            processEvent.address = 0;
-            //processEvent.maxBreakpointCount = 0;
-            //processEvent.maxWatchpointCount = 0;
+
 
             processEvent.maxSharedBreakpoints = 4;
+            debugThread = threadIds[0];
 
             addDebugEvent(processEvent);
-           
 
-            DebugEvent deEvent = new DebugEvent();
-            deEvent.debugevent = -1;
-            deEvent.threadid = threadIds[0];
-            deEvent.address = PS4APIWrapper.getRegisters(threadIds[0]).r_rip;
-            addDebugEvent(deEvent);
+            //CreateDebugEvent deEvent = new CreateDebugEvent();
+            //deEvent.debugevent = -1;
+            //deEvent.threadid = threadIds[0];
 
+            //addDebugEvent(deEvent);
+
+            //DebugEvent evet = new DebugEvent();
+            //evet.debugevent = 5;
+            //evet.threadid = threadIds[0];
+            //evet.address = 12356;
+            //addDebugEvent(evet);
+
+            threads = new HashSet<uint>(threadIds);
 
             return value;
         }
@@ -204,97 +212,180 @@ namespace CEServerPS4.PS4API
 
         public static IntPtr SetBreakpoint(IntPtr handle, int tid, IntPtr debugreg, UInt64 address, int bptype, int bpsize)
         {
+            if (adrresses.Contains(address))
+            {
+                return (IntPtr)1;
+            }
+
+            if (tid == -1)
+            {
+
+                for (int i = 0; i < PS4DBG.MAX_WATCHPOINTS; i++)
+                {
+                    if (SetBreakpoint(i, debugreg, address, bptype, bpsize) != 0)
+                    {
+                        adrresses.Add(address);
+                        return (IntPtr)1;
+                    }
+
+                }
+                return (IntPtr)0;
+            }
+            else
+            {
+                if (SetBreakpoint(tid, debugreg, address, bptype, bpsize) != 0)
+                {
+                    adrresses.Add(address);
+                    return (IntPtr)tid;
+                }
+                return (IntPtr)0;
+            }
+
+        }
+
+        private static int SetBreakpoint(int tid, IntPtr debugreg, UInt64 address, int bptype, int bpsize)
+        {
             try
             {
-                if (tid == -1)
+                SetWatchPointEvent se = new SetWatchPointEvent();
+                SetWatchPointRequest request = new SetWatchPointRequest
                 {
-                    for (int i = 0; i < PS4DBG.MAX_WATCHPOINTS; i++)
-                    {
-                        try
-                        {
-                            PS4APIWrapper.SetWatchpoint(i, address, bpsize, bptype);
-                            return (IntPtr)i;
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("cant create watch point");
-                        }
+                    Address = address,
+                    Bpsize = bpsize,
+                    Bptype = bptype,
+                    Tid = tid
+                };
+                se.Data = request;
+                DebugEventHandler.AddEvent(se);
 
-                    }
-                    return (IntPtr)0;
-                }
-                else
-                {
-                    PS4APIWrapper.SetWatchpoint(tid, address, bpsize, bptype);
-                    return (IntPtr)1;
-                }
+                return (int)DebugEventHandler.ConsumeAsync(se.BufferBlock).Result;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                return (IntPtr)0;
+                Console.WriteLine("cant create watch point for" + tid);
+                return 0;
             }
         }
 
         public static IntPtr RemoveBreakpoint(IntPtr handle, int tid, IntPtr debugreg, int wasWatchpoint)
         {
-            try
-            {
-                if (tid == -1)
-                {
-                    PS4APIWrapper.ClearWatchPoints();
-                }
-                else
-                {
-                    PS4APIWrapper.ClearWatchpoint(tid);
-                }
-
-                return (IntPtr)1;
-            }
-            catch (Exception e)
+            RemoveWatchPointEvent se = new RemoveWatchPointEvent();
+            RemoveWatchPointRequest request = new RemoveWatchPointRequest
             {
 
-                return (IntPtr)0;
-            }
+                Tid = tid
+            };
+            se.Data = request;
+            DebugEventHandler.AddEvent(se);
+
+            int obj = (int)DebugEventHandler.ConsumeAsync(se.BufferBlock).Result;
+            return (IntPtr)obj;
         }
 
         public static IntPtr SuspendThread(IntPtr handle, uint tid)
         {
-            try
-            {
-                PS4APIWrapper.SuspendDebuggerThread(tid);
-                return (IntPtr)1;
-            }
-            catch (Exception e)
+            SuspendThreadEvent se = new SuspendThreadEvent();
+            SuspendThreadRequest request = new SuspendThreadRequest
             {
 
-                return (IntPtr)0;
-            }
+                Tid = tid
+            };
+            se.Data = request;
+            DebugEventHandler.AddEvent(se);
+
+            int obj = (int)DebugEventHandler.ConsumeAsync(se.BufferBlock).Result;
+            return (IntPtr)obj;
         }
         public static IntPtr ResumeThread(IntPtr handle, uint tid)
         {
-            try
-            {
-                PS4APIWrapper.resumeDebuggerThread(tid);
-                return (IntPtr)1;
-            }
-            catch (Exception e)
+            ResumeThreadEvent se = new ResumeThreadEvent();
+            ResumeThreadRequest request = new ResumeThreadRequest
             {
 
-                return (IntPtr)0;
-            }
+                Tid = tid
+            };
+            se.Data = request;
+            DebugEventHandler.AddEvent(se);
+
+            int obj = (int)DebugEventHandler.ConsumeAsync(se.BufferBlock).Result;
+            return (IntPtr)obj;
         }
 
         public static IntPtr GetThreadContext(IntPtr handle, uint tid, out CONTEXT Context, int type)
         {
             try
             {
-                regs r = PS4APIWrapper.getRegisters(tid);
+                if (!threads.Contains(tid))
+                {
+                    tid = debugThread;
+                }
+                ThreadContextEvent se = new ThreadContextEvent();
+                ThreadContextRequest request = new ThreadContextRequest
+                {
+
+                    Tid = tid ,
+                    Type = type
+                };
+                se.Data = request;
+                DebugEventHandler.AddEvent(se);
+                regs r = (regs)DebugEventHandler.ConsumeAsync(se.BufferBlock).Result;
+
+
                 assignThreadRegisters(r, out CONTEXT_REGS regs);
-                Context = new CONTEXT();
-                Context.regs = regs;
+                Context = new CONTEXT
+                {
+                    regs = regs
+                };
+
+                if (regs.rip == 0)
+                {
+                    return (IntPtr)0;
+                }
+
                 return (IntPtr)1;
             }
-            catch (Exception e)
+            catch (Exception)
+            {
+                Context = new CONTEXT();
+                return (IntPtr)0;
+            }
+
+        }
+
+        public static IntPtr setThreadContext(IntPtr handle, uint tid, CONTEXT Context, int type)
+        {
+            try
+            {
+                if (!threads.Contains(tid))
+                {
+                    tid = debugThread;
+                }
+                ThreadContextEvent se = new ThreadContextEvent();
+                ThreadContextRequest request = new ThreadContextRequest
+                {
+
+                    Tid = tid,
+                    Type = type
+                };
+                se.Data = request;
+                DebugEventHandler.AddEvent(se);
+                regs r = (regs)DebugEventHandler.ConsumeAsync(se.BufferBlock).Result;
+
+
+                assignThreadRegisters(r, out CONTEXT_REGS regs);
+                Context = new CONTEXT
+                {
+                    regs = regs
+                };
+
+                if (regs.rip == 0)
+                {
+                    return (IntPtr)0;
+                }
+
+                return (IntPtr)1;
+            }
+            catch (Exception)
             {
                 Context = new CONTEXT();
                 return (IntPtr)0;
@@ -309,9 +400,8 @@ namespace CEServerPS4.PS4API
                 evet = debugEvents.Take();
                 currentDebugEvent = evet;
                 return (IntPtr)1;
-
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 evet = new DebugEvent();
                 return (IntPtr)0;
@@ -322,10 +412,15 @@ namespace CEServerPS4.PS4API
         {
             try
             {
-                return (IntPtr)1;
+               
+                ProcessReumeEvent se = new ProcessReumeEvent();
+                DebugEventHandler.AddEvent(se);
 
+                int obj = (int)DebugEventHandler.ConsumeAsync(se.BufferBlock).Result;
+                return (IntPtr)obj;
+                
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return (IntPtr)0;
             }
