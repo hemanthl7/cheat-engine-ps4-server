@@ -5,11 +5,16 @@ A port of the linux/android cheat engine server to Windows utilizing C# ported f
 The initial  reason this project was created was to 'bypass' some applications that block Cheat Engine when running in the same machine or just refuse to run when Cheat Engine is running as well. With this you can run Cheat Engine in a separate environment and connect to the target machine.
 
 # Example usage
-If you just want to run the serve as is there is a console project named **CEServerApplicaiton** that takes advantage of the generated library which is an assembly with the following code:
+If you just want to run the server as is there is a console project named **CEServerApplicaiton** that takes advantage of the generated library which is an assembly with the following code:
 ```csharp
             CheatEngineServer server = new CheatEngineServer();
             server.StartAsync().Wait();
 ```
+If you just want to run the server as is there is a console application named CEServerPS4.exe:
+```cmd
+            CEServerPS4.exe 192.168.137.2
+```
+
 If you wish to handle a specific command from cheat engine differently or register a new one you can do this by either extending one of the defined Commands in **CEServerWindows.CheatEnginePackets.S2C** or by implementing  the **ICheatEngineResponse** interface although it is recommended to extend the base class **CheatEngineCommand**
 
 For example you could override the **Process** method of **ReadProcessorMemoryCommand** to utilize a different way of reading the memory of the target process such as communication with a kernel module/driver.
