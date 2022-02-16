@@ -21,9 +21,10 @@ namespace CEServerPS4
         private CancellationToken _token;
         
 
-        public CheatEngineServer(ushort port = 52736) : this(port, new PacketManager())
+        public CheatEngineServer(string ip,ushort port = 52736) : this(port, new PacketManager())
         {
-            PS4API.PS4APIWrapper.Connect("192.168.137.2");
+            // PS4API.PS4APIWrapper.Connect("192.168.137.2");
+            PS4API.PS4APIWrapper.Connect(ip);
             this.RegisterDefaultHandlers();
         }
 

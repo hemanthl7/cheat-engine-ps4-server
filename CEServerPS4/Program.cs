@@ -14,13 +14,64 @@ namespace CEServerPS4
 
         static int pid;
         static Thread t;
-        static CheatEngineServer cheatEngine = new CheatEngineServer();
+       
 
         static void Main(string[] args)
         {
+
+            if (!(args.Length > 0))
+            {
+                Console.WriteLine("use CEServerPS4 <ip>");
+                Console.WriteLine("Example CEServerPS4 197.168.137.2");
+                return;
+            }
+
+            Start(args[0]);
+
+        }
+
+        public static void DebuggerInterruptCallback(
+           uint lwpid,
+           uint status,
+           string tdname,
+           regs regs,
+           fpregs fpregs,
+           dbregs dbregs)
+        {
+
             
+            Console.WriteLine("status=:" + regs.r_rip);
+
+
+        }
+
+
+        //public static void rbuffer(object address)
+        //{
+           
+        //    while (true)
+        //    {
+        //        try
+        //        {
+        //            byte[] bs = PS4APIWrapper.ReadMemory((ulong)address, 20);
+        //            Console.WriteLine("String" + Encoding.UTF8.GetString(bs));
+        //        }catch(Exception e)
+        //        {
+        //            Console.WriteLine("error:" + e.Message);
+        //            break;
+        //        }
+                
+        //    }
+            
+        //}
+
+        public static void Start(string ip)
+        {
+            CheatEngineServer cheatEngine = new CheatEngineServer(ip);
             ProcessList list = PS4APIWrapper.GetProcessList();
             cheatEngine.StartAsync().Wait();
+
+            //cheatEngine.StartAsync().Wait();
             //foreach (Process p in list.processes)
             //{
             //    if (p.name.Contains("eboot"))
@@ -57,60 +108,5 @@ namespace CEServerPS4
             //}
         }
 
-        public static void DebuggerInterruptCallback(
-           uint lwpid,
-           uint status,
-           string tdname,
-           regs regs,
-           fpregs fpregs,
-           dbregs dbregs)
-        {
-
-            
-            Console.WriteLine("status=:" + regs.r_rip);
-
-
-        }
-
-        public static void runSecondThread(ulong address)
-        {
-            if (t == null)
-            {
-                t = new Thread(rbuffer);
-           
-
-                t = new Thread(start)
-                {
-                    IsBackground = true
-                };
-                t.Start();
-            }
-           
-        }
-
-        public static void rbuffer(object address)
-        {
-           
-            while (true)
-            {
-                try
-                {
-                    byte[] bs = PS4APIWrapper.ReadMemory((ulong)address, 20);
-                    Console.WriteLine("String" + Encoding.UTF8.GetString(bs));
-                }catch(Exception e)
-                {
-                    Console.WriteLine("error:" + e.Message);
-                    break;
-                }
-                
-            }
-            
-        }
-
-        public static void start()
-        {
-            //cheatEngine.StartAsync().Wait();
-        }
-        
     }
 }
