@@ -87,7 +87,7 @@ namespace CEServerPS4.EventHandler
             }
             catch (Exception)
             {
-                Console.WriteLine("Exception ocuccerd in" + debugThreadEvent.CommandType);
+                Console.WriteLine("Exception ocuccerd in " + debugThreadEvent.CommandType);
             }
             finally
             {

@@ -137,6 +137,7 @@ namespace CEServerPS4
             this.RegisterCommandHandler(new WaitForDebugEventCommand());
             this.RegisterCommandHandler(new ContinueForDebugEventCommand());
             this.RegisterCommandHandler(new WriteProcessMemoryCommand());
+            this.RegisterCommandHandler(new GetABICommand());
         }
 
         public void RegisterCommandHandler(ICheatEngineCommand command)

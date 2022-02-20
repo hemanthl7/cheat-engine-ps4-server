@@ -26,6 +26,7 @@ namespace CEServerPS4.CheatEnginePackets.S2C
             if (this.Result)
             {
                 br.Write((long)ModuleEntry.modBaseAddr);
+                br.Write(ModuleEntry.GlblcntUsage);
                 br.Write(ModuleEntry.modBaseSize);
                 br.Write(ModuleEntry.szModule.Length);
                 br.Write(Encoding.UTF8.GetBytes(ModuleEntry.szModule));
@@ -33,6 +34,7 @@ namespace CEServerPS4.CheatEnginePackets.S2C
             else
             {
                 br.Write(0L);//Base Address
+                br.Write(0);//part
                 br.Write(0);//Mod Size
                 br.Write(0);//str Size
             }

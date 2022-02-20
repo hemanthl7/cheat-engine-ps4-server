@@ -49,8 +49,8 @@ namespace CEServerPS4.CheatEnginePackets.S2C
                 br.Write(pe.maxBreakpointCount);
                 br.Write(pe.maxWatchpointCount);
                 br.Write(pe.maxSharedBreakpoints);
-                br.Write((sbyte)0);
                 br.Write((int)0);
+                br.Write((sbyte)0);
             }
             else
             {

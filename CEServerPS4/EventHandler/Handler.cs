@@ -39,7 +39,7 @@ namespace CEServerPS4.EventHandler
         {
             RemoveWatchPointEvent watchPointEvent = (RemoveWatchPointEvent)obj;
             RemoveWatchPointRequest r = (RemoveWatchPointRequest)watchPointEvent.Data;
-            response = 0; ;
+            response = 0; 
 
             if (r.Tid == -1)
             {

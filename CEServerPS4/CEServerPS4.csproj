@@ -80,6 +80,7 @@
     <Compile Include="CheatEnginePackets\C2S\ContinueForDebugEventCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\CreateToolHelp32SnapshotCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\Exceptions\CommandNotInitializedException.cs" />
+    <Compile Include="CheatEnginePackets\C2S\GetABICommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\GetArchitectureCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\GetSymbolsFromFileCommand.cs" />
     <Compile Include="CheatEnginePackets\C2S\GetThreadContextCommand.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="CheatEnginePackets\PacketManager.cs" />
     <Compile Include="CheatEnginePackets\S2C\CloseHandleResponse.cs" />
     <Compile Include="CheatEnginePackets\S2C\ContinueForDebugEventResponse.cs" />
+    <Compile Include="CheatEnginePackets\S2C\GetABIResponse.cs" />
     <Compile Include="CheatEnginePackets\S2C\GetArchitectureResponse.cs" />
     <Compile Include="CheatEnginePackets\S2C\GetSymbolsFromFileResponse.cs" />
     <Compile Include="CheatEnginePackets\S2C\GetVersionResponse.cs" />

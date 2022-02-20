@@ -8,7 +8,8 @@ namespace CEServerPS4.CheatEnginePackets.S2C
 {
     public class GetVersionResponse : ICheatEngineResponse
     {
-        public const string VERSION = "CHEATENGINE Network 2.0";
+        public const string VERSION = "CHEATENGINE Network 2.1";
+        public const string VER = "CH";
         public string version;
 
         public GetVersionResponse()
@@ -26,8 +27,8 @@ namespace CEServerPS4.CheatEnginePackets.S2C
             MemoryStream ms = new MemoryStream();
             BinaryWriter br = new BinaryWriter(ms);
             br.Write(version.Length);
-            br.Write(Encoding.UTF8.GetBytes(version));
-
+            br.Write((byte)2);
+            br.Write(Encoding.UTF8.GetBytes(VER));
             br.Close();
             return ms.ToArray();
         }
