@@ -1,9 +1,9 @@
 
 # Cheat engine windows server 
 First of All,
-A Big Thanks to CTN for Sharing Libdebug soucre code and ps4debug payload without it would not be possible.
+A Big Thanks to CTN for Sharing Libdebug source code and ps4debug payload without it would not be possible.
 
-I am Gratful to these Cheat Enngine team, Devlpoers and Testers:
+I am Grateful to these Cheat Engine team, Developers and Testers:
 - [@CTN](https://github.com/ctn123)
 - [@Shiningami](https://ko-fi.com/shiningami)
 - Rizla 
