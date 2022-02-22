@@ -1,12 +1,13 @@
 
-# Cheat engine windows server
+# Cheat engine windows server 
 First of All,
 A Big Thanks to CTN for Sharing Libdebug soucre code and ps4debug payload without it would not be possible.
-I am Gratful to these Devlpoers and Testers:
+I am Gratful to these Cheat Enngine team, Devlpoers and Testers:
 - [@CTN](https://github.com/ctn123)
 - [@Shiningami](https://ko-fi.com/shiningami)
 - Rizla 
 - [@GrimDoe](https://twitter.com/GrimDoe)
+- [@Dark Byte](https://cheatengine.org/)
 
 A port of the linux/android cheat engine server to Windows utilizing C# ported from the [official Cheat Engine repositotry](https://github.com/cheat-engine/cheat-engine/tree/a2d035583c35c0cb2455bd9aef771efbba1570c3/Cheat%20Engine/ceserver).
 The initial  reason this project was created was to 'bypass' some applications that block Cheat Engine when running in the same machine or just refuse to run when Cheat Engine is running as well. With this you can run Cheat Engine in a separate environment and connect to the target machine.
