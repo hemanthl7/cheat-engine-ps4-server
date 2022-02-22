@@ -6,7 +6,7 @@ A Big Thanks to CTN for Sharing Libdebug source code and ps4debug payload withou
 I am Grateful to these Cheat Engine team, Developers and Testers:
 - [@CTN](https://github.com/ctn123)
 - [@Shiningami](https://ko-fi.com/shiningami)
-- Rizla 
+- [@Rizla](https://github.com/Dankzy) 
 - [@GrimDoe](https://twitter.com/GrimDoe)
 - [@Dark Byte](https://cheatengine.org/)
 
