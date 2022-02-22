@@ -9,6 +9,7 @@ I am Grateful to these Cheat Engine team, Developers and Testers:
 - [@Rizla](https://github.com/Dankzy) 
 - [@GrimDoe](https://twitter.com/GrimDoe)
 - [@Dark Byte](https://cheatengine.org/)
+- jogolden and Ps4 supporters 
 
 A port of the linux/android cheat engine server to Windows utilizing C# ported from the [official Cheat Engine repositotry](https://github.com/cheat-engine/cheat-engine/tree/a2d035583c35c0cb2455bd9aef771efbba1570c3/Cheat%20Engine/ceserver).
 The initial  reason this project was created was to 'bypass' some applications that block Cheat Engine when running in the same machine or just refuse to run when Cheat Engine is running as well. With this you can run Cheat Engine in a separate environment and connect to the target machine.
