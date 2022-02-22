@@ -3,11 +3,8 @@
 First of All,
 A Big Thanks to CTN for Sharing Libdebug soucre code without it would be possible.
 I am Gratful to these Devlpoers and Testers:
-Devlpoers:
 - [@CTN](https://github.com/ctn123)
 - [@Shiningami](https://ko-fi.com/shiningami)
-
-Testers:
 - Rizla 
 - [@GrimDoe](https://twitter.com/GrimDoe)
 
