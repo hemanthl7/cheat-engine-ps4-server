@@ -18,14 +18,14 @@ namespace CEServerPS4.EventHandler
 
     public class SetWatchPointHandler : IHandler
     {
-        public CommandType CommandType => CommandType.CMD_SETBREAKPOINT;
+        public CommandType CommandType => CommandType.CMD_SETWATCHPOINT;
 
         public void handle(Object obj, out Object response)
         {
             response = 0;
             SetWatchPointEvent watchPointEvent = (SetWatchPointEvent)obj;
             SetWatchPointRequest r = (SetWatchPointRequest)watchPointEvent.Data;
-            PS4APIWrapper.SetWatchpoint(r.Tid, r.Address, r.Bpsize, r.Bptype);
+            PS4DedugAPIWrapper.SetWatchpoint(r.Tid, r.Address, r.Bpsize, r.Bptype);
             response = 1;
         }
     }
@@ -33,7 +33,7 @@ namespace CEServerPS4.EventHandler
 
     public class RemoveWatchPointHandler : IHandler
     {
-        public CommandType CommandType => CommandType.CMD_REMOVEBREAKPOINT;
+        public CommandType CommandType => CommandType.CMD_REMOVEWATCHPOINT;
 
         public void handle(Object obj, out Object response)
         {
@@ -43,16 +43,54 @@ namespace CEServerPS4.EventHandler
 
             if (r.Tid == -1)
             {
-                PS4APIWrapper.ClearWatchPoints();
+                PS4DedugAPIWrapper.ClearWatchPoints();
                 response = 1;
             }
             else
             {
-                PS4APIWrapper.ClearWatchpoint(r.Tid);
+                PS4DedugAPIWrapper.ClearWatchpoint(r.Tid);
                 response = 1;
             }
-           
-           
+        }
+    }
+
+    public class SetBreakPointHandler : IHandler
+    {
+        public CommandType CommandType => CommandType.CMD_SETBREAKPOINT;
+
+        public void handle(Object obj, out Object response)
+        {
+            response = 0;
+            SetBreakPointEvent breakPointEvent = (SetBreakPointEvent)obj;
+            SetBreakPointRequest r = (SetBreakPointRequest)breakPointEvent.Data;
+            PS4DedugAPIWrapper.SetBreakpoint(r.Tid, r.Address);
+            response = 1;
+        }
+    }
+
+
+    public class RemoveBreakPointHandler : IHandler
+    {
+        public CommandType CommandType => CommandType.CMD_REMOVEBREAKPOINT;
+
+        public void handle(Object obj, out Object response)
+        {
+            RemoveBreakPointEvent breakPointEvent = (RemoveBreakPointEvent)obj;
+            RemoveBreakPointRequest r = (RemoveBreakPointRequest)breakPointEvent.Data;
+            response = 0;
+
+            if (r.Tid == -1)
+            {
+                PS4DedugAPIWrapper.ClearBreakpoints();
+                response = 1;
+            }
+            else
+            {
+                PS4DedugAPIWrapper.ClearBreakpoint(r.Tid);
+                response = 1;
+            }
+
+
         }
     }
 
@@ -66,7 +104,7 @@ namespace CEServerPS4.EventHandler
             SuspendThreadRequest r = (SuspendThreadRequest)watchPointEvent.Data;
             response = 0;
 
-            PS4APIWrapper.StopDebuggerThread(r.Tid);
+            PS4DedugAPIWrapper.StopDebuggerThread(r.Tid);
             response=1;
 
         }
@@ -83,7 +121,7 @@ namespace CEServerPS4.EventHandler
             ResumeThreadRequest r = (ResumeThreadRequest)watchPointEvent.Data;
             response = 0;
 
-            PS4APIWrapper.resumeDebuggerThread(r.Tid);
+            PS4DedugAPIWrapper.resumeDebuggerThread(r.Tid);
             response = 1;
 
         }
@@ -98,21 +136,22 @@ namespace CEServerPS4.EventHandler
             ThreadContextEvent watchPointEvent = (ThreadContextEvent)obj;
             ThreadContextRequest r = (ThreadContextRequest)watchPointEvent.Data;
             response = new regs();
-            response = PS4APIWrapper.getRegisters(r.Tid);
+            response = PS4DedugAPIWrapper.getRegisters(r.Tid);
 
         }
     }
 
 
-    public class ProcessRumeHandler : IHandler
+    public class ContinueDebugEventHandler : IHandler
     {
         public CommandType CommandType => CommandType.CMD_CONTINUEFROMDEBUGEVENT;
 
         public void handle(Object obj, out Object response)
         {
-            ProcessReumeEvent watchPointEvent = (ProcessReumeEvent)obj;
+            ContinueDebugEvent Cevent = (ContinueDebugEvent)obj;
+            ContinueDebugEventRequest rq = (ContinueDebugEventRequest)Cevent.Data;
             response = 0;
-            PS4APIWrapper.ProcessResume();
+            PS4DedugAPIWrapper.ContinueBreakpointThread(rq.Tid, rq.singleStep);
             response = 1;
 
         }

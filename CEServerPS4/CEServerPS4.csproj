@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.UI.Xaml.2.7.0\build\Microsoft.UI.Xaml.props" Condition="Exists('..\packages\Microsoft.UI.Xaml.2.7.0\build\Microsoft.UI.Xaml.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{91218BB6-DF7E-406C-8CC2-EFD5FFF732EC}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>CEServerPS4</RootNamespace>
     <AssemblyName>CEServerPS4</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -27,6 +28,8 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -50,21 +53,22 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>CEServerPS4.Program</StartupObject>
+    <StartupObject>
+    </StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="libdebug">
+      <HintPath>lib\libdebug.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-    </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\System.Threading.Tasks.Dataflow.6.0.2-mauipre.1.22102.15\lib\net461\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -120,41 +124,42 @@
     <Compile Include="CheatEnginePackets\S2C\VirtualQueryExFullResponse.cs" />
     <Compile Include="CheatEnginePackets\S2C\VirtualQueryExResponse.cs" />
     <Compile Include="CheatEnginePackets\S2C\WaitForDebugEventResponse.cs" />
+    <Compile Include="CheatEngineConstants.cs" />
     <Compile Include="CheatEngineServer.cs" />
+    <Compile Include="PS4CEServerWindows.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PS4CEServerWindows.Designer.cs">
+      <DependentUpon>PS4CEServerWindows.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RJToggleButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="EventHandler\DebugEventHandler.cs" />
-    <Compile Include="EventHandler\Event\ProcessReumeEvent.cs" />
+    <Compile Include="EventHandler\Event\ContinueDebugEvent.cs" />
+    <Compile Include="EventHandler\Event\RemoveBreakPointEvent.cs" />
     <Compile Include="EventHandler\Event\ResumeThreadEvent.cs" />
+    <Compile Include="EventHandler\Event\SetBreakPointEvent.cs" />
     <Compile Include="EventHandler\Event\ThreadContextEvent.cs" />
     <Compile Include="EventHandler\Event\SuspendThreadEvent.cs" />
     <Compile Include="EventHandler\Event\RemoveWatchPointEvent.cs" />
     <Compile Include="EventHandler\Event\SetWatchPointEvent.cs" />
     <Compile Include="EventHandler\Event\DebugThreadEvent.cs" />
     <Compile Include="EventHandler\Handler.cs" />
+    <Compile Include="EventHandler\Request\ContinueDebugEventRequest.cs" />
+    <Compile Include="EventHandler\Request\RemoveBreakPointRequest.cs" />
     <Compile Include="EventHandler\Request\ResumeThreadRequest.cs" />
+    <Compile Include="EventHandler\Request\SetBreakPointRequest.cs" />
     <Compile Include="EventHandler\Request\ThreadContextRequest.cs" />
     <Compile Include="EventHandler\Request\SuspendThreadRequest.cs" />
     <Compile Include="EventHandler\Request\RemoveWatchPointRequest.cs" />
     <Compile Include="EventHandler\Request\SetWatchPointRequest.cs" />
-    <Compile Include="libdebug\acc.cs" />
-    <Compile Include="libdebug\dbregs.cs" />
-    <Compile Include="libdebug\envxmm.cs" />
-    <Compile Include="libdebug\fpregs.cs" />
-    <Compile Include="libdebug\MemoryEntry.cs" />
-    <Compile Include="libdebug\Process.cs" />
-    <Compile Include="libdebug\ProcessInfo.cs" />
-    <Compile Include="libdebug\ProcessList.cs" />
-    <Compile Include="libdebug\ProcessMap.cs" />
-    <Compile Include="libdebug\PS4DBG.cs" />
-    <Compile Include="libdebug\regs.cs" />
-    <Compile Include="libdebug\savefpu_xstate.cs" />
-    <Compile Include="libdebug\ThreadInfo.cs" />
-    <Compile Include="libdebug\xmmacc.cs" />
-    <Compile Include="libdebug\xstate_hdr.cs" />
-    <Compile Include="libdebug\ymmacc.cs" />
     <Compile Include="PS4API\DebugAPI.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PS4API\MemoryAPI.cs" />
+    <Compile Include="PS4API\PS4Static.cs" />
+    <Compile Include="PS4API\PS4DedugAPIWrapper.cs" />
     <Compile Include="PS4API\PS4APIWrapper.cs" />
     <Compile Include="PS4API\ToolHelp.cs" />
   </ItemGroup>
@@ -174,5 +179,16 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="PS4CEServerWindows.resx">
+      <DependentUpon>PS4CEServerWindows.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.UI.Xaml.2.7.0\build\Microsoft.UI.Xaml.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.UI.Xaml.2.7.0\build\Microsoft.UI.Xaml.props'))" />
+  </Target>
 </Project>

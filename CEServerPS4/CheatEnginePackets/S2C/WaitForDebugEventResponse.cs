@@ -23,10 +23,11 @@ namespace CEServerPS4.CheatEnginePackets.S2C
         {
             MemoryStream ms = new MemoryStream();
             BinaryWriter br = new BinaryWriter(ms);
-           
-            
             br.Write((int)handle);
-            set(ref br);
+            if ((int)handle > 0)
+            {
+                set(ref br);
+            }
             br.Close();
             return ms.ToArray();
         }

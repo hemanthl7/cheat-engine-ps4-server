@@ -10,6 +10,6 @@ namespace CEServerPS4.EventHandler.Event
 {
     public class RemoveWatchPointEvent : DebugThreadEvent
     {
-        public override CommandType CommandType => CommandType.CMD_REMOVEBREAKPOINT;
+        public override CommandType CommandType => CommandType.CMD_REMOVEWATCHPOINT;
     }
 }

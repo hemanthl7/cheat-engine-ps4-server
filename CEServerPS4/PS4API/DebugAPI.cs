@@ -22,15 +22,26 @@ namespace CEServerPS4.PS4API
 
         private static uint debugThread;
 
+        public static uint getThd()
+        {
+            return debugThread;
+        }
+
         private static HashSet<uint> threads = new HashSet<uint>();
 
         private static HashSet<ulong> adrresses = new HashSet<ulong>();
-        private static Dictionary<ulong, int> breakpoints = new Dictionary<ulong, int>();
+        private static Dictionary<ulong, int> breakpointsAddress = new Dictionary<ulong, int>();
+
+        private static Dictionary<ulong, int> watchpointAddress = new Dictionary<ulong, int>();
 
         private static Dictionary<uint, ulong> watchThreaads = new Dictionary<uint, ulong>();
         private static Dictionary<ulong, uint> watchAddress = new Dictionary<ulong, uint>();
 
+        private static Dictionary<uint, ulong> breakThreaads = new Dictionary<uint, ulong>();
+        private static Dictionary<ulong, uint> breakAddress = new Dictionary<ulong, uint>();
+
         private static Stack<int> watchpoints = new Stack<int>();
+        private static Stack<int> breakpoints = new Stack<int>();
 
         [StructLayout(LayoutKind.Sequential)]
         [Serializable]
@@ -128,37 +139,61 @@ namespace CEServerPS4.PS4API
             DebugEvent evet = new DebugEvent();
             evet.debugevent = 5;
             evet.threadid = lwpid;
-            evet.address = regs.r_rip;
+           
             debugThread = lwpid;
-            watchThreaads[lwpid]= regs.r_rip;
-            watchAddress[regs.r_rip] = lwpid ;
             ulong daddress;
+            bool isBp;
             if((dbregs.dr6 & 1) == 1)
             {
                 daddress = dbregs.dr0;
+                isBp = false;
+                if (regs.r_rip == dbregs.dr0 && dbregs.dr7 == 0)
+                {
+                    isBp = true;
+                }
             }else if(((dbregs.dr6 >>1)& 1) == 1)
             {
                 daddress = dbregs.dr1;
+                isBp = false;
             }
             else if (((dbregs.dr6 >> 2) & 1) == 1)
             {
                 daddress = dbregs.dr2;
+                isBp = false;
             }
             else if (((dbregs.dr6 >> 3) & 1) == 1)
             {
                 daddress = dbregs.dr3;
+                isBp = false;
             }
             else
             {
-                daddress = regs.r_rdi;
+                if(!breakThreaads.TryGetValue(lwpid,out daddress)){
+                    daddress = regs.r_rip;
+                }
+                isBp = true;
             }
+
+            if (isBp)
+            {
+                breakThreaads[lwpid] = daddress;
+                breakAddress[daddress] = lwpid;
+            }
+            else
+            {
+                watchThreaads[lwpid] = daddress;
+                watchAddress[daddress] = lwpid;
+            }
+           // dbregs.dr6 = 0;
+           // PS4DedugAPIWrapper.getps4().SetDebugRegisters(lwpid, dbregs);
+            PS4DedugAPIWrapper.getps4().SingleStep();
             evet.address = daddress;
-            watchThreaads[lwpid] = daddress;
-            watchAddress[daddress] = lwpid;
 
             Thread nThread = new Thread(addDebugEvent) { IsBackground = true };
             nThread.Start(evet);
-
+            Console.WriteLine("address=:" + regs.r_rip);
+            Console.WriteLine("thread=:" + lwpid);
+            Console.WriteLine("breakaddress=:" + daddress);
         }
 
         private static void addDebugEvent(Object evet)
@@ -201,8 +236,8 @@ namespace CEServerPS4.PS4API
         public static IntPtr StartDebug(IntPtr hProcess)
         {
 
-            IntPtr value = (IntPtr)PS4APIWrapper.attachDebugger();
-            threadIds = PS4APIWrapper.GetThreadsList();
+            IntPtr value = (IntPtr)PS4DedugAPIWrapper.attachDebugger(new PS4DBG.DebuggerInterruptCallback(DebuggerInterruptCallback));
+            threadIds = PS4DedugAPIWrapper.GetThreadsList();
             ProcessEvent processEvent = new ProcessEvent();
             processEvent.debugevent = -2;
             processEvent.threadid = threadIds[0];
@@ -233,7 +268,7 @@ namespace CEServerPS4.PS4API
         }
         public static IntPtr StopDebug(IntPtr handle)
         {
-            IntPtr value = (IntPtr)PS4APIWrapper.dettachDebugger();
+            IntPtr value = (IntPtr)PS4DedugAPIWrapper.dettachDebugger();
 
             return value;
         }
@@ -241,19 +276,31 @@ namespace CEServerPS4.PS4API
 
         public static IntPtr SetBreakpoint(IntPtr handle, int tid, IntPtr debugreg, UInt64 address, int bptype, int bpsize)
         {
+           // return SetWatchpointToPS4(handle, tid, debugreg, address, bptype, bpsize);
+           // return SetBreakpointToPS4(handle, tid, debugreg, address, bptype, bpsize);
+            if (isWatchPoint(bptype, bpsize))
+            {
+                return SetWatchpointToPS4(handle, tid, debugreg, address, bptype, bpsize);
+            }
+            else
+            {
+                return SetBreakpointToPS4(handle, tid, debugreg, address, bptype, bpsize);
+            }
+        }
+            public static IntPtr SetBreakpointToPS4(IntPtr handle, int tid, IntPtr debugreg, UInt64 address, int bptype, int bpsize)
+        { 
 
-            int num = findWatchPointNumber();
+            int num = findBreakPointNumber();
 
             if(num == -2)
             {
                 return (IntPtr)0;
             }
 
-
-            if (breakpoints.ContainsKey(address))
+            if (breakpointsAddress.ContainsKey(address))
             {
                 uint ti;
-                if(!watchAddress.TryGetValue(address,out ti)){
+                if(!breakAddress.TryGetValue(address,out ti)){
                     Console.WriteLine("no tid present for the address " + address.ToString("X"));
                 }
                 return (IntPtr)1;
@@ -261,7 +308,36 @@ namespace CEServerPS4.PS4API
 
             if (SetBreakpoint(num, debugreg, address, bptype, bpsize) != 0)
             {
-                breakpoints[address] = num;
+                breakpointsAddress[address] = num;
+                breakpoints.Push(num);
+                return (IntPtr)1;
+            }
+            return (IntPtr)0;
+        }
+
+        public static IntPtr SetWatchpointToPS4(IntPtr handle, int tid, IntPtr debugreg, UInt64 address, int bptype, int bpsize)
+        {
+
+            int num = findWatchPointNumber();
+
+            if (num == -2)
+            {
+                return (IntPtr)0;
+            }
+
+            if (watchpointAddress.ContainsKey(address))
+            {
+                uint ti;
+                if (!watchAddress.TryGetValue(address, out ti))
+                {
+                    Console.WriteLine("no tid present for the address " + address.ToString("X"));
+                }
+                return (IntPtr)1;
+            }
+
+            if (SetWatchpoint(num, debugreg, address, bptype, bpsize) != 0)
+            {
+                watchpointAddress[address] = num;
                 watchpoints.Push(num);
                 return (IntPtr)1;
             }
@@ -269,6 +345,28 @@ namespace CEServerPS4.PS4API
         }
 
         private static int SetBreakpoint(int tid, IntPtr debugreg, UInt64 address, int bptype, int bpsize)
+        {
+            try
+            {
+                SetBreakPointEvent se = new SetBreakPointEvent();
+                SetBreakPointRequest request = new SetBreakPointRequest
+                {
+                    Address = address,
+                    Tid = tid
+                };
+                se.Data = request;
+                DebugEventHandler.AddEvent(se);
+
+                return (int)DebugEventHandler.ConsumeAsync(se.BufferBlock).Result;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("cant create break point for" + tid);
+                return 0;
+            }
+        }
+
+        private static int SetWatchpoint(int tid, IntPtr debugreg, UInt64 address, int bptype, int bpsize)
         {
             try
             {
@@ -292,11 +390,51 @@ namespace CEServerPS4.PS4API
             }
         }
 
-        public static IntPtr RemoveBreakpoint(IntPtr handle, int tid, IntPtr debugreg, int wasWatchpoint)
+
+        public static IntPtr RemoveBreakpoint(IntPtr handle, int tid, IntPtr debugreg,ulong address, int wasWatchpoint)
         {
-            if(tid == -1)
+           // return RemoveWatchpointFromPS4(handle, tid, debugreg, address, wasWatchpoint);
+           // return RemoveBreakpointFromPS4(handle, tid, debugreg, wasWatchpoint);
+            if (wasWatchpoint == 1)
             {
-                breakpoints.Clear();
+                return RemoveWatchpointFromPS4(handle, tid, debugreg, address, wasWatchpoint);
+            }
+            else
+            {
+                return RemoveBreakpointFromPS4(handle, tid, debugreg, address, wasWatchpoint);
+            }
+        }
+
+            public static IntPtr RemoveWatchpointFromPS4(IntPtr handle, int tid, IntPtr debugreg, ulong address, int wasWatchpoint)
+        {
+
+            if (address > 0)
+            {
+                if (watchpoints.Count > 0)
+                {
+                    watchpoints.Pop();
+                }
+                if (watchpointAddress.Count > 0)
+                {
+
+                    if (watchpointAddress.TryGetValue(address, out int wp))
+                    {
+
+                        if (watchAddress.TryGetValue(address, out uint ti))
+                        {
+                            breakAddress.Remove(address);
+                            watchThreaads.Remove(ti);
+                        }
+                        watchpointAddress.Remove(address);
+                        return RemoveWatchPointEventFromPS4(wp);
+                    }
+
+                    return (IntPtr)1;
+                }
+            }
+            if (tid == -1)
+            {
+                watchpointAddress.Clear();
                 watchpoints.Clear();
                 watchThreaads.Clear();
                 watchAddress.Clear();
@@ -309,15 +447,20 @@ namespace CEServerPS4.PS4API
                     watchpoints.Pop();
                 }
                
-                ulong ad;
-                if(watchThreaads.TryGetValue(Convert.ToUInt32(tid),out ad)){
-                    watchThreaads.Remove(Convert.ToUInt32(tid));
-                    watchAddress.Remove(ad);
-                    breakpoints.Remove(ad);
-                }
-                if (breakpoints.Count > 0)
+                if (watchpointAddress.Count > 0)
                 {
-                    return RemoveWatchPointEventFromPS4(tid);
+                    if (watchThreaads.TryGetValue(Convert.ToUInt32(tid), out ulong ad))
+                    {
+                        if (watchpointAddress.TryGetValue(Convert.ToUInt32(tid), out int wp))
+                        {
+                            watchThreaads.Remove(Convert.ToUInt32(tid));
+                            watchAddress.Remove(ad);
+                            watchpointAddress.Remove(ad);
+                            return RemoveWatchPointEventFromPS4(wp);
+                        }
+
+                    }
+                    return (IntPtr)1;
                 }
                 else
                 {
@@ -331,6 +474,86 @@ namespace CEServerPS4.PS4API
         {
             RemoveWatchPointEvent se = new RemoveWatchPointEvent();
             RemoveWatchPointRequest request = new RemoveWatchPointRequest
+            {
+
+                Tid = tid
+            };
+            se.Data = request;
+            DebugEventHandler.AddEvent(se);
+
+            int obj = (int)DebugEventHandler.ConsumeAsync(se.BufferBlock).Result;
+            return (IntPtr)obj;
+        }
+
+
+        public static IntPtr RemoveBreakpointFromPS4(IntPtr handle, int tid, IntPtr debugreg, ulong address, int wasWatchpoint)
+        {
+            if (address > 0)
+            {
+                if (breakpoints.Count > 0)
+                {
+                    breakpoints.Pop();
+                }
+                if (breakpointsAddress.Count > 0)
+                {
+
+                    if (breakpointsAddress.TryGetValue(address, out int bp))
+                    {
+                        
+                        if (breakAddress.TryGetValue(address, out uint ti))
+                        {
+                            breakAddress.Remove(address);
+                            breakThreaads.Remove(ti);
+                        }
+                        breakpointsAddress.Remove(address);
+                        return RemoveBreakPointEventFromPS4(bp);
+                    }
+                    
+                    return (IntPtr)1;
+                }
+            }
+            
+            if (tid == -1)
+            {
+                breakpointsAddress.Clear();
+                breakpoints.Clear();
+                breakAddress.Clear();
+                breakThreaads.Clear();
+                return RemoveBreakPointEventFromPS4(tid);
+            }
+            else
+            {
+                if (breakpoints.Count > 0)
+                {
+                    breakpoints.Pop();
+                }
+                if (breakpointsAddress.Count > 0)
+                {
+                    if (breakThreaads.TryGetValue(Convert.ToUInt32(tid), out ulong ad))
+                    {
+                        if (breakpointsAddress.TryGetValue(Convert.ToUInt32(tid), out int bp))
+                        {
+                            breakThreaads.Remove(Convert.ToUInt32(tid));
+                            breakAddress.Remove(ad);
+                            breakpointsAddress.Remove(ad);
+                            return RemoveBreakPointEventFromPS4(bp);
+                        }
+                    }
+                    return (IntPtr)1;
+                }
+                else
+                {
+                    return (IntPtr)1;
+                }
+            }
+
+        }
+
+
+        public static IntPtr RemoveBreakPointEventFromPS4(int tid)
+        {
+            RemoveBreakPointEvent se = new RemoveBreakPointEvent();
+            RemoveBreakPointRequest request = new RemoveBreakPointRequest
             {
 
                 Tid = tid
@@ -454,13 +677,19 @@ namespace CEServerPS4.PS4API
 
         }
 
-        public static IntPtr WaitForDebugEvent(IntPtr handle, uint timeout, out Object evet)
+        public static IntPtr WaitForDebugEvent(IntPtr handle, int timeout, out Object evet)
         {
             try
             {
-                evet = debugEvents.Take();
-                currentDebugEvent = evet;
-                return (IntPtr)1;
+                Object et;
+                if(debugEvents.TryTake(out et, timeout))
+                {
+                    evet = et;
+                    currentDebugEvent = evet;
+                    return (IntPtr)1;
+                }
+                evet = new DebugEvent();
+                return (IntPtr)0;
             }
             catch (Exception)
             {
@@ -474,7 +703,18 @@ namespace CEServerPS4.PS4API
             try
             {
                
-                ProcessReumeEvent se = new ProcessReumeEvent();
+                ContinueDebugEvent se = new ContinueDebugEvent();
+                ContinueDebugEventRequest rq = new ContinueDebugEventRequest();
+                rq.Tid = tid;
+                if(continuemethod == 2)
+                {
+                    rq.singleStep = true;
+                }
+                else
+                {
+                    rq.singleStep = false;
+                }
+                se.Data = rq;      
                 DebugEventHandler.AddEvent(se);
 
                 int obj = (int)DebugEventHandler.ConsumeAsync(se.BufferBlock).Result;
@@ -502,5 +742,32 @@ namespace CEServerPS4.PS4API
             }
         }
 
+        private static int findBreakPointNumber()
+        {
+            if (breakpoints.Count <= 0)
+            {
+                return 0;
+            }
+            else if (breakpoints.Count > 0 && breakpoints.Count < PS4DBG.MAX_BREAKPOINTS)
+            {
+                return breakpoints.Peek() + 1;
+            }
+            else
+            {
+                return -2;
+            }
+        }
+
+        private static bool isWatchPoint(int btype,int bsize)
+        {
+            if(btype==0 && bsize == 1)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
     }
 }

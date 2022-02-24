@@ -23,8 +23,8 @@ namespace CEServerPS4
 
         public CheatEngineServer(string ip,ushort port = 52736) : this(port, new PacketManager())
         {
-            // PS4API.PS4APIWrapper.Connect("192.168.137.2");
-            PS4API.PS4APIWrapper.Connect(ip);
+            PS4API.PS4Static.IP = ip;
+            PS4API.PS4APIWrapper.Connect();
             this.RegisterDefaultHandlers();
         }
 
@@ -88,7 +88,6 @@ namespace CEServerPS4
                 {
                     var tcpClientTask = _tcpListener.AcceptTcpClientAsync();
                     var result = await tcpClientTask;
-                    Console.WriteLine("new Ps4 request");
                     _ = Task.Run(() =>
                       {
                           HandleReceivedClient(result);

@@ -11,13 +11,13 @@ namespace CEServerPS4.CheatEnginePackets.C2S
     {
         public override CommandType CommandType => CommandType.CMD_WAITFORDEBUGEVENT;// throw new NotImplementedException();
         public IntPtr handle;
-        public uint timeout;
+        public int timeout;
         public WaitForDebugEventCommand()
         {
 
         }
 
-        public WaitForDebugEventCommand(IntPtr handle,uint timeout)
+        public WaitForDebugEventCommand(IntPtr handle,int timeout)
         {
             this.handle = handle;
             this.timeout = timeout;
@@ -27,14 +27,13 @@ namespace CEServerPS4.CheatEnginePackets.C2S
         public override void Initialize(BinaryReader reader)
         {
             this.handle = (IntPtr)reader.ReadInt32();
-            this.timeout = reader.ReadUInt32();
+            this.timeout = reader.ReadInt32();
             this.initialized = true;
         }
 
         public override WaitForDebugEventResponse Process()
         {
             IntPtr hande = PS4API.DebugAPI.WaitForDebugEvent(handle, timeout,out object evt);
-            Console.WriteLine("wait");
             return new WaitForDebugEventResponse(hande,evt);
         }
     }

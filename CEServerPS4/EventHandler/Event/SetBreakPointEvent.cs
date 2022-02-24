@@ -8,8 +8,8 @@ using CEServerPS4.EventHandler.Request;
 
 namespace CEServerPS4.EventHandler.Event
 {
-    public class SetWatchPointEvent : DebugThreadEvent
+    public class SetBreakPointEvent : DebugThreadEvent
     {
-        public override CommandType CommandType => CommandType.CMD_SETWATCHPOINT;
+        public override CommandType CommandType => CommandType.CMD_SETBREAKPOINT;
     }
 }

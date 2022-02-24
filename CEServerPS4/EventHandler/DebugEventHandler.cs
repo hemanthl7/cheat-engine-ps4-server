@@ -111,7 +111,9 @@ namespace CEServerPS4.EventHandler
             RegisterHandler(new SuspendThreadHandler());
             RegisterHandler(new RemoveWatchPointHandler());
             RegisterHandler(new ThreadContextHandler());
-            RegisterHandler(new ProcessRumeHandler());
+            RegisterHandler(new ContinueDebugEventHandler());
+            RegisterHandler(new SetBreakPointHandler());
+            RegisterHandler(new RemoveBreakPointHandler());
         } 
 
     }
