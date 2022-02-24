@@ -184,9 +184,7 @@ namespace CEServerPS4.PS4API
                 watchThreaads[lwpid] = daddress;
                 watchAddress[daddress] = lwpid;
             }
-           // dbregs.dr6 = 0;
-           // PS4DedugAPIWrapper.getps4().SetDebugRegisters(lwpid, dbregs);
-            PS4DedugAPIWrapper.getps4().SingleStep();
+
             evet.address = daddress;
 
             Thread nThread = new Thread(addDebugEvent) { IsBackground = true };
