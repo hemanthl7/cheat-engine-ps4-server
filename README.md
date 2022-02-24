@@ -1,5 +1,15 @@
 
-# Cheat engine windows server
+# Cheat engine windows server 
+First of All,
+A Big Thanks to CTN for Sharing Libdebug source code and ps4debug payload without it would not be possible.
+
+I am Grateful to these Cheat Engine team, Developers and Testers:
+- [@CTN](https://github.com/ctn123)
+- [@Shiningami](https://ko-fi.com/shiningami)
+- [@Rizla](https://github.com/Dankzy) 
+- [@GrimDoe](https://twitter.com/GrimDoe)
+- [@Dark Byte](https://cheatengine.org/)
+- jogolden and Ps4 supporters 
 
 A port of the linux/android cheat engine server to Windows utilizing C# ported from the [official Cheat Engine repositotry](https://github.com/cheat-engine/cheat-engine/tree/a2d035583c35c0cb2455bd9aef771efbba1570c3/Cheat%20Engine/ceserver).
 The initial  reason this project was created was to 'bypass' some applications that block Cheat Engine when running in the same machine or just refuse to run when Cheat Engine is running as well. With this you can run Cheat Engine in a separate environment and connect to the target machine.
@@ -21,11 +31,8 @@ For example you could override the **Process** method of **ReadProcessorMemoryCo
 
 # What doesn't work
 Even though the official cheat engine server 'ports' a few of Windows API calls some code is specific to linux and are not easily brought back to windows 
-* **WriteProcessMemory**: This method was not implemented as I did not have a need for it but it might be implemented in the future
-* **Debugging**: No debugging features are implemented, this might be able to be ported.
 * **Compression**: The current implementation of the command **ReadProcessMemory** does not implement compression, this is disabled by default in Cheat Engine (Network >> Compression)
-* **Thread Handling**: It is not possible, currently, to suspend resume, get or set the thread context
-* **CMD_GETREGIONINFO**: Not sure how to implement this in Windows
 * **Debug symbols**: Symbols are not loaded as we believe that cheat engine expects debug symbols for elf binaries
 * **Speed hack**: Not implemented
 * **Alloc/Free**: Not implemented
+* **Aob injection**:Not Implemented 
