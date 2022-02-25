@@ -2,6 +2,7 @@
 using System.Threading;
 using libdebug;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace CEServerPS4.PS4API
 {
@@ -56,9 +57,9 @@ namespace CEServerPS4.PS4API
 
                 return true;
             }
-            catch
+            catch(Exception e)
             {
-                Console.WriteLine("unable to connect");
+                Trace.WriteLine("unable to connect:"+e.Message);
             }
             finally
             {
@@ -84,9 +85,9 @@ namespace CEServerPS4.PS4API
 
                 return true;
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("unable to disconnect");
+                Trace.WriteLine("unable to disconnect:"+e.Message);
             }
             finally
             {
@@ -104,9 +105,9 @@ namespace CEServerPS4.PS4API
             {
                 return ps4[currentThreadId].ReadMemory(ProcessID, address, length);
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("Error while reading Memory ");
+                Trace.WriteLine("Error while reading Memory :"+e.Message);
             }
             finally
             {
@@ -123,9 +124,9 @@ namespace CEServerPS4.PS4API
             {
                 ps4[currentThreadId].WriteMemory(ProcessID, address, data);
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("Error while write Memory ");
+                Trace.WriteLine("Error while write Memory :"+e.Message);
             }
             finally
             {
@@ -142,9 +143,9 @@ namespace CEServerPS4.PS4API
                 return ps4[currentThreadId].GetProcessList();
 
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("Error while GetProcessList ");
+                Trace.WriteLine("Error while GetProcessList:"+e.Message);
             }
             finally
             {
@@ -163,9 +164,9 @@ namespace CEServerPS4.PS4API
                 ProcessInfo processInfo = ps4[currentThreadId].GetProcessInfo(processID);
                 return processInfo;
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("Error while GetProcessList ");
+                Trace.WriteLine("Error while GetProcessInfo:"+e.Message);
             }
             finally
             {
@@ -183,9 +184,9 @@ namespace CEServerPS4.PS4API
                 ProcessMap processMap = ps4[currentThreadId].GetProcessMaps(processID);
                 return processMap;
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("Error while GetProcessMaps ");
+                Trace.WriteLine("Error while GetProcessMaps:"+e.Message);
             }
             finally
             {

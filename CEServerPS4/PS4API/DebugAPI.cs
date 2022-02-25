@@ -5,6 +5,7 @@ using libdebug;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -135,7 +136,7 @@ namespace CEServerPS4.PS4API
         {
 
             //debugThreadId = lwpid;
-            Console.WriteLine("status=:" + status);
+            Trace.WriteLine("status=:" + status);
             DebugEvent evet = new DebugEvent();
             evet.debugevent = 5;
             evet.threadid = lwpid;
@@ -184,14 +185,15 @@ namespace CEServerPS4.PS4API
                 watchThreaads[lwpid] = daddress;
                 watchAddress[daddress] = lwpid;
             }
-
+           // dbregs.dr6 = 0;
+           // PS4DedugAPIWrapper.getps4().SetDebugRegisters(lwpid, dbregs);
             evet.address = daddress;
 
             Thread nThread = new Thread(addDebugEvent) { IsBackground = true };
             nThread.Start(evet);
-            Console.WriteLine("address=:" + regs.r_rip);
-            Console.WriteLine("thread=:" + lwpid);
-            Console.WriteLine("breakaddress=:" + daddress);
+            Trace.WriteLine("address=:" + regs.r_rip);
+            Trace.WriteLine("thread=:" + lwpid);
+            Trace.WriteLine("breakaddress=:" + daddress);
         }
 
         private static void addDebugEvent(Object evet)
@@ -299,7 +301,7 @@ namespace CEServerPS4.PS4API
             {
                 uint ti;
                 if(!breakAddress.TryGetValue(address,out ti)){
-                    Console.WriteLine("no tid present for the address " + address.ToString("X"));
+                    Trace.WriteLine("no tid present for the address " + address.ToString("X"));
                 }
                 return (IntPtr)1;
             }
@@ -328,7 +330,7 @@ namespace CEServerPS4.PS4API
                 uint ti;
                 if (!watchAddress.TryGetValue(address, out ti))
                 {
-                    Console.WriteLine("no tid present for the address " + address.ToString("X"));
+                    Trace.WriteLine("no tid present for the address " + address.ToString("X"));
                 }
                 return (IntPtr)1;
             }
@@ -359,7 +361,7 @@ namespace CEServerPS4.PS4API
             }
             catch (Exception)
             {
-                Console.WriteLine("cant create break point for" + tid);
+                Trace.WriteLine("cant create break point for" + tid);
                 return 0;
             }
         }
@@ -383,7 +385,7 @@ namespace CEServerPS4.PS4API
             }
             catch (Exception)
             {
-                Console.WriteLine("cant create watch point for" + tid);
+                Trace.WriteLine("cant create watch point for" + tid);
                 return 0;
             }
         }

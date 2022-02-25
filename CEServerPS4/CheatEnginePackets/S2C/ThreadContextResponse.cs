@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace CEServerPS4.CheatEnginePackets.S2C
 {
@@ -73,7 +74,7 @@ namespace CEServerPS4.CheatEnginePackets.S2C
 
             br.Write(rgs.rip);
 
-            Console.WriteLine("adress:"+rgs.rip);
+            Trace.WriteLine("adress:"+rgs.rip);
 
             br.Write(rgs.cs);
 

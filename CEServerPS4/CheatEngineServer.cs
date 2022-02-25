@@ -9,6 +9,7 @@ using CEServerPS4.CheatEnginePackets.C2S;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Diagnostics;
 
 namespace CEServerPS4
 {
@@ -64,8 +65,8 @@ namespace CEServerPS4
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e + ": "+  e.Message);
-                    Console.WriteLine(e.StackTrace);
+                    Trace.WriteLine(e + ": "+  e.Message);
+                    Trace.WriteLine(e.StackTrace);
                     client.Close();
                     Dispose();
                     break;

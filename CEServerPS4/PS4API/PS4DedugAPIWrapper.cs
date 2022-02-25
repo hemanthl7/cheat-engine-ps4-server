@@ -2,6 +2,7 @@
 using System.Threading;
 using libdebug;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace CEServerPS4.PS4API
 {
@@ -22,9 +23,9 @@ namespace CEServerPS4.PS4API
             {
                 return ps4Debugger.GetThreadList(); 
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("Error while GetThreadsList ");
+                Trace.WriteLine("Error while GetThreadsList :" + e.Message);
             }
             
             return null;
@@ -46,8 +47,8 @@ namespace CEServerPS4.PS4API
             }
             catch (Exception e)
             {
-                Console.WriteLine("unable to connect");
-                Console.WriteLine(e.Message);
+                Trace.WriteLine("unable to attach:" + e.Message);
+                Trace.WriteLine(e.Message);
             }
 
             return 0;
@@ -62,8 +63,8 @@ namespace CEServerPS4.PS4API
             }
             catch(Exception e)
             {
-                Console.WriteLine("unable to detach");
-                Console.WriteLine(e.Message);
+                Trace.WriteLine("unable to detach:" + e.Message);
+                Trace.WriteLine(e.Message);
                 return 0;
             }
             
@@ -78,8 +79,8 @@ namespace CEServerPS4.PS4API
             }
             catch (Exception e)
             {
-                Console.WriteLine("unable to resume process");
-                Console.WriteLine(e.Message);
+                Trace.WriteLine("unable to resume process:" + e.Message);
+                Trace.WriteLine(e.Message);
             }
 
         }
@@ -92,8 +93,8 @@ namespace CEServerPS4.PS4API
             }
             catch (Exception e)
             {
-                Console.WriteLine("unable to resume");
-                Console.WriteLine(e.Message);
+                Trace.WriteLine("unable to resume:" + e.Message);
+                Trace.WriteLine(e.Message);
                 throw e;
             }
 
@@ -115,8 +116,8 @@ namespace CEServerPS4.PS4API
             }
             catch (Exception e)
             {
-                Console.WriteLine("unable to continue");
-                Console.WriteLine(e.Message);
+                Trace.WriteLine("unable to continue:"+e.Message);
+                Trace.WriteLine(e.Message);
                 throw e;
             }
 
@@ -131,8 +132,8 @@ namespace CEServerPS4.PS4API
             }
             catch (Exception e)
             {
-                Console.WriteLine("unable to stop thread");
-                Console.WriteLine(e.Message);
+                Trace.WriteLine("unable to stop thread:"+e.Message);
+                Trace.WriteLine(e.Message);
                 throw e;
             }
 
@@ -197,7 +198,7 @@ namespace CEServerPS4.PS4API
                 address);
             }catch(Exception e)
             {
-                Console.WriteLine("breakpoint error");
+                Trace.WriteLine("breakpoint error:"+e.Message);
                 throw e;
             }
             

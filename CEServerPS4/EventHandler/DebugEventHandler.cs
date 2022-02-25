@@ -10,6 +10,7 @@ using System.Threading.Tasks.Dataflow;
 using System.Threading.Tasks;
 using CEServerPS4.EventHandler.Event;
 using CEServerPS4.CheatEnginePackets;
+using System.Diagnostics;
 
 namespace CEServerPS4.EventHandler
 {
@@ -63,9 +64,9 @@ namespace CEServerPS4.EventHandler
                     object obj = debugEvents.Take();
                     Handle(obj);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    Console.WriteLine("Error Executing Event");
+                    Trace.WriteLine("Error Executing Event:" + e.Message);
                 }
             }
         }
@@ -80,14 +81,14 @@ namespace CEServerPS4.EventHandler
                 if (!handlers.TryGetValue(debugThreadEvent.CommandType, out IHandler handler))
                 {
 
-                    Console.WriteLine("handler not found:" + debugThreadEvent.CommandType);
+                    Trace.WriteLine("handler not found:" + debugThreadEvent.CommandType);
                     throw new MissingCommandHandlerException();
                 }
                 handler.handle(debugThreadEvent ,out response);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Console.WriteLine("Exception ocuccerd in " + debugThreadEvent.CommandType);
+                Trace.WriteLine("Exception ocuccerd in " + debugThreadEvent.CommandType+ " :" + e.Message);
             }
             finally
             {

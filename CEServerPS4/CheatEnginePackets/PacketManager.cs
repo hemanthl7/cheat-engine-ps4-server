@@ -2,6 +2,7 @@
 using CEServerPS4.CheatEnginePackets.S2C;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -41,7 +42,7 @@ namespace CEServerPS4.CheatEnginePackets
                 //But if that were the case knowledge of all commands would be necessary
                 //As the protocol doesn't provide a way to know the 'size' of the incoming message
                 //this.consumeAll(reader);
-                Console.WriteLine(type);
+                Trace.WriteLine(type);
                 throw new MissingCommandHandlerException();
             }
             command = (ICheatEngineCommand)Activator.CreateInstance(command.GetType()); 
