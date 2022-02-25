@@ -47,8 +47,8 @@ namespace CEServerPS4.PS4API
             }
             catch (Exception e)
             {
-                Trace.WriteLine("unable to attach:" + e.Message);
-                Trace.WriteLine(e.Message);
+                Trace.WriteLine("unable to attach");
+                Trace.WriteLine(e);
             }
 
             return 0;
@@ -58,13 +58,18 @@ namespace CEServerPS4.PS4API
         {
             try
             {
-                ps4Debugger.DetachDebugger();
+                if (ps4Debugger != null)
+                {
+                    ps4Debugger.DetachDebugger();
+                    ps4Debugger.Disconnect();
+                }
+                
                 return 1;
             }
             catch(Exception e)
             {
-                Trace.WriteLine("unable to detach:" + e.Message);
-                Trace.WriteLine(e.Message);
+                Trace.WriteLine("unable to detach");
+                Trace.WriteLine(e);
                 return 0;
             }
             

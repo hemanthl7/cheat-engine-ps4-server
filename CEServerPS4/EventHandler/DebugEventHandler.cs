@@ -67,8 +67,23 @@ namespace CEServerPS4.EventHandler
                 catch (Exception e)
                 {
                     Trace.WriteLine("Error Executing Event:" + e.Message);
+                    break;
                 }
             }
+        }
+
+        public static void stoplistening()
+        {
+            try
+            {
+                debugEvents.CompleteAdding();
+                debugEvents.Dispose();
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e);
+            }
+
         }
 
         public static void Handle(object DebuggerEvent)

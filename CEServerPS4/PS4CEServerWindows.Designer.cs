@@ -18,6 +18,11 @@
                 components.Dispose();
             }
             base.Dispose(disposing);
+            if (cheatEngineServer != null)
+            {
+                cheatEngineServer.Dispose();
+            }
+            
         }
 
         #region Windows Form Designer generated code
@@ -129,6 +134,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox IPTextBox;
-        private System.Windows.Forms.Button ConnectBtn;
+        public System.Windows.Forms.Button ConnectBtn;
     }
 }

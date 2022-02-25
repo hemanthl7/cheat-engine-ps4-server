@@ -18,7 +18,20 @@ namespace CEServerPS4
         private TcpListener _tcpListener;
         private PacketManager packetManager;
         private CancellationTokenSource _tokenSource;
-        private bool _listening;
+
+        private bool isDisposed
+        {
+            get;set;
+        }
+        public static bool islistening
+        {
+            get; set;
+        }
+
+        public static ConnectType isConnected
+        {
+            get; set;
+        }
         private CancellationToken _token;
         
 
@@ -27,6 +40,7 @@ namespace CEServerPS4
             PS4API.PS4Static.IP = ip;
             PS4API.PS4APIWrapper.Connect();
             this.RegisterDefaultHandlers();
+            isConnected = ConnectType.INIT;
         }
 
         public CheatEngineServer(PacketManager pm) : this(52736, pm)
@@ -79,26 +93,37 @@ namespace CEServerPS4
         {
             _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token ?? new CancellationToken());
             _token = _tokenSource.Token;
-            _tcpListener.Start();
-            _listening = true;
-
             try
             {
-                
+                _tcpListener.Start();
+                isConnected = ConnectType.SUCCESS;
+                islistening = true;
+                isDisposed = false;
                 while (!_token.IsCancellationRequested)
                 {
-                    var tcpClientTask = _tcpListener.AcceptTcpClientAsync();
-                    var result = await tcpClientTask;
-                    _ = Task.Run(() =>
-                      {
-                          HandleReceivedClient(result);
-                      }, _token);
+                    if (islistening)
+                    {
+                        var tcpClientTask = _tcpListener.AcceptTcpClientAsync();
+                        var result = await tcpClientTask;
+                        _ = Task.Run(() =>
+                        {
+                            HandleReceivedClient(result);
+                        }, _token);
+                    }
+                    
                 }
             }
             finally
             {
-                _tcpListener.Stop();
-                _listening = false;
+                if (islistening)
+                {
+                    _tcpListener.Stop();
+                    islistening = false;
+                }
+                if (!ConnectType.SUCCESS.Equals(isConnected))
+                {
+                    isConnected = ConnectType.FAILED;
+                }
                 Dispose();            
             }
         }
@@ -110,7 +135,19 @@ namespace CEServerPS4
 
         public void Dispose()
         {
-            Stop();
+            if (!isDisposed)
+            {
+                isDisposed = true;
+                Stop();
+                if (islistening)
+                {
+                    _tcpListener.Stop();
+                    islistening = false;
+                }
+                PS4API.PS4DedugAPIWrapper.dettachDebugger();
+                PS4API.PS4APIWrapper.Disconnect();
+            }
+            
         }
 
         private void RegisterDefaultHandlers()

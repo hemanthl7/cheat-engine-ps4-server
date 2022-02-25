@@ -76,7 +76,7 @@ namespace CEServerPS4.PS4API
             {
                 for (int i = 0; i < num_threads; i++)
                 {
-                    mutex[i].WaitOne();
+                    
                     if (ps4[i] != null)
                     {
                         ps4[i].Disconnect();
@@ -88,11 +88,6 @@ namespace CEServerPS4.PS4API
             catch (Exception e)
             {
                 Trace.WriteLine("unable to disconnect:"+e.Message);
-            }
-            finally
-            {
-                for (int i = 0; i < num_threads; i++)
-                    mutex[i].ReleaseMutex();
             }
             return false;
         }

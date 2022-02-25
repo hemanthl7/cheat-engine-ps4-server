@@ -20,4 +20,11 @@ namespace CEServerPS4
         }
 
     }
+
+    public enum ConnectType
+    {
+        INIT,
+        SUCCESS,
+        FAILED
+    }
 }
